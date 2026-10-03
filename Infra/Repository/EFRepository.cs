@@ -15,16 +15,16 @@ namespace Infra.Repository
             _dbSet = _context.Set<T>();
         }
 
-        public void Alterar(T entidade)
+        public async Task AlterarAsync(T entidade)
         {
             _dbSet.Update(entidade);
-            _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
 
-        public void Cadastrar(T entidade)
+        public async Task Cadastrar(T entidade)
         {
             _dbSet.Add(entidade);
-            _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
 
         public async Task Deletar(int id)
