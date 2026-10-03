@@ -70,7 +70,7 @@ namespace UsersAPI.Services
             {
                 Usuario user = Usuario.AdicionarUsuario(usuarioInput, nivelAcesso, senha);
 
-                _usuarioRepository.Cadastrar(user);
+                await _usuarioRepository.Cadastrar(user);
 
                 _logger.LogInformation("Usuário {Email} adicionado com sucesso, Id={Id}", usuarioInput.Email, user.Id);
 
@@ -110,7 +110,7 @@ namespace UsersAPI.Services
 
             usuario.Atualizar(usuario, usuarioUpdate, senha);
 
-            _usuarioRepository.Alterar(usuario);
+            await _usuarioRepository.AlterarAsync(usuario);
 
             _logger.LogInformation("Usuário {Id} atualizado com sucesso", id);
 
@@ -127,7 +127,7 @@ namespace UsersAPI.Services
                 throw new ExcepetionUsuarioNaoEncontrado("Usuário não encontrado");
 
             usuario.Desativar();
-            _usuarioRepository.Alterar(usuario);
+            await _usuarioRepository.AlterarAsync(usuario);
 
             _logger.LogInformation("Usuário {Id} removido com sucesso", id);
 

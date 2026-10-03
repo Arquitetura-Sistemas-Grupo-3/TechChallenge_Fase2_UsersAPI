@@ -11,8 +11,8 @@ namespace Core.Repository
     {
         Task<IList<T>> ObterTodos();
         Task<T> ObterPorId(int id);
-        public void Cadastrar(T entidade);
-        public void Alterar(T entidade);
+        public Task Cadastrar(T entidade);
+        public Task AlterarAsync(T entidade);
         Task Deletar(int id);
     }
 }
