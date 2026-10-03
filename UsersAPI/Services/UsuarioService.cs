@@ -3,7 +3,10 @@ using Core.Entidade;
 using Core.Entidade.Enums;
 using Core.Output;
 using Core.Repository;
+using Core.ValueObjects;
 using Infra.Exceptions;
+using MassTransit;
+using MassTransit.Internals.ImTools;
 using UsersAPI.Interface;
 using BC = BCrypt.Net.BCrypt;
 
@@ -13,11 +16,13 @@ namespace UsersAPI.Services
     {
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly ILogger<UsuarioService> _logger;
+        private readonly IPublishEndpoint _publish;
 
-        public UsuarioService(IUsuarioRepository usuarioRepository, ILogger<UsuarioService> logger)
+        public UsuarioService(IUsuarioRepository usuarioRepository, ILogger<UsuarioService> logger, IPublishEndpoint publish)
         {
             _usuarioRepository = usuarioRepository;
             _logger = logger;
+            _publish = publish;
         }
         public async Task<ServiceResponse<List<UsuarioListarResposta>>> Listar(string? Nome = null, string? Email = null, string? NivelAcesso = null)
         {
@@ -73,6 +78,8 @@ namespace UsersAPI.Services
                 _usuarioRepository.Cadastrar(user);
 
                 _logger.LogInformation("Usuário {Email} adicionado com sucesso, Id={Id}", usuarioInput.Email, user.Id);
+
+                var e = await PublicarMensagemFila(user);
 
                 return ServiceResponse<UsuarioAdicionarResposta>.Ok(new UsuarioAdicionarResposta { Id = user.Id }, "Usuário adicionado com sucesso");
             }
@@ -145,5 +152,29 @@ namespace UsersAPI.Services
 
             return ServiceResponse<UsuarioBuscarAutenticadoResposta>.Ok(usuario);
         }
+
+        private async Task<UsuarioCriado> PublicarMensagemFila(Usuario usuarioInput, CancellationToken ct = default)
+        {
+            var evento = new UsuarioCriado(Guid.NewGuid(), usuarioInput.Nome, usuarioInput.Email, DateTime.UtcNow);
+            await _publish.Publish(evento, ct);
+            return evento;
+        }
+
+        public class UsuarioCriado
+        {
+            public Guid GUID { get; set; }
+            public string nomeUsuario { get; set; }
+            public Email emailUsuario { get; set; }
+            public DateTime dataEvento { get; set; }
+
+            public UsuarioCriado(Guid gUID, string nomeUsuario, Email emailUsuario, DateTime dataEvento)
+            {
+                GUID = gUID;
+                this.nomeUsuario = nomeUsuario;
+                this.emailUsuario = emailUsuario;
+                this.dataEvento = dataEvento;
+            }
+        }
+
     }
 }
