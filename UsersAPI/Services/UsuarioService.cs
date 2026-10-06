@@ -16,13 +16,14 @@ namespace UsersAPI.Services
     {
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly ILogger<UsuarioService> _logger;
-        private readonly IPublishEndpoint _publish;
+        private readonly IMensageriaService _mensageriaService;
+        
 
-        public UsuarioService(IUsuarioRepository usuarioRepository, ILogger<UsuarioService> logger, IPublishEndpoint publish)
+        public UsuarioService(IUsuarioRepository usuarioRepository, ILogger<UsuarioService> logger, IMensageriaService mensageriaService)
         {
             _usuarioRepository = usuarioRepository;
             _logger = logger;
-            _publish = publish;
+            _mensageriaService = mensageriaService;
         }
         public async Task<ServiceResponse<List<UsuarioListarResposta>>> Listar(string? Nome = null, string? Email = null, string? NivelAcesso = null)
         {
@@ -79,7 +80,7 @@ namespace UsersAPI.Services
 
                 _logger.LogInformation("Usuário {Email} adicionado com sucesso, Id={Id}", usuarioInput.Email, user.Id);
 
-                var e = await PublicarMensagemFila(user);
+                var e = await _mensageriaService.PublicarMensagemFila(user,CancellationToken.None);
 
                 return ServiceResponse<UsuarioAdicionarResposta>.Ok(new UsuarioAdicionarResposta { Id = user.Id }, "Usuário adicionado com sucesso");
             }
@@ -153,12 +154,7 @@ namespace UsersAPI.Services
             return ServiceResponse<UsuarioBuscarAutenticadoResposta>.Ok(usuario);
         }
 
-        private async Task<UsuarioCriado> PublicarMensagemFila(Usuario usuarioInput, CancellationToken ct = default)
-        {
-            var evento = new UsuarioCriado(Guid.NewGuid(), usuarioInput.Nome, usuarioInput.Email, DateTime.UtcNow);
-            await _publish.Publish(evento, ct);
-            return evento;
-        }
+
 
         public class UsuarioCriado
         {

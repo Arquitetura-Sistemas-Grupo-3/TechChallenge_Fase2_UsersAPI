@@ -98,6 +98,7 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<INivelAcessoRepository, NivelAcessoRepository>();
 builder.Services.AddScoped<IAuthService, AutenticacaoService>();
+builder.Services.AddScoped<IMensageriaService, MensageriaService>();
 
 builder.Services.AddTransient<CorrelationIdMiddleware>();
 #endregion
