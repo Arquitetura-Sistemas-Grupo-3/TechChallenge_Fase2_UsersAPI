@@ -3,6 +3,7 @@ using Core.Validation;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Infra.Repository;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Logging;
@@ -22,6 +23,25 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
+#region [MassTransit]
+builder.Services.AddMassTransit(x =>
+{
+    // Producer puro: não registramos consumers aqui
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        var rabbit = builder.Configuration.GetSection("RabbitMq");
+
+        cfg.Host("localhost", "/", h =>
+        {
+            h.Username("admin");
+            h.Password("admin123");
+        });
+
+        cfg.ConfigureEndpoints(context);
+    });
+});
+#endregion
 
 #region [Swagger]
 builder.Services.AddSwaggerGen(options =>
@@ -78,6 +98,7 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<INivelAcessoRepository, NivelAcessoRepository>();
 builder.Services.AddScoped<IAuthService, AutenticacaoService>();
+builder.Services.AddScoped<IMensageriaService, MensageriaService>();
 
 builder.Services.AddTransient<CorrelationIdMiddleware>();
 #endregion

@@ -3,7 +3,10 @@ using Core.Entidade;
 using Core.Entidade.Enums;
 using Core.Output;
 using Core.Repository;
+using Core.ValueObjects;
 using Infra.Exceptions;
+using MassTransit;
+using MassTransit.Internals.ImTools;
 using UsersAPI.Interface;
 using BC = BCrypt.Net.BCrypt;
 
@@ -13,11 +16,14 @@ namespace UsersAPI.Services
     {
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly ILogger<UsuarioService> _logger;
+        private readonly IMensageriaService _mensageriaService;
+        
 
-        public UsuarioService(IUsuarioRepository usuarioRepository, ILogger<UsuarioService> logger)
+        public UsuarioService(IUsuarioRepository usuarioRepository, ILogger<UsuarioService> logger, IMensageriaService mensageriaService)
         {
             _usuarioRepository = usuarioRepository;
             _logger = logger;
+            _mensageriaService = mensageriaService;
         }
         public async Task<ServiceResponse<List<UsuarioListarResposta>>> Listar(string? Nome = null, string? Email = null, string? NivelAcesso = null)
         {
@@ -73,6 +79,8 @@ namespace UsersAPI.Services
                 await _usuarioRepository.Cadastrar(user);
 
                 _logger.LogInformation("Usuário {Email} adicionado com sucesso, Id={Id}", usuarioInput.Email, user.Id);
+
+                var e = await _mensageriaService.PublicarMensagemFila(user,CancellationToken.None);
 
                 return ServiceResponse<UsuarioAdicionarResposta>.Ok(new UsuarioAdicionarResposta { Id = user.Id }, "Usuário adicionado com sucesso");
             }
@@ -145,5 +153,24 @@ namespace UsersAPI.Services
 
             return ServiceResponse<UsuarioBuscarAutenticadoResposta>.Ok(usuario);
         }
+
+
+
+        public class UsuarioCriado
+        {
+            public Guid GUID { get; set; }
+            public string nomeUsuario { get; set; }
+            public Email emailUsuario { get; set; }
+            public DateTime dataEvento { get; set; }
+
+            public UsuarioCriado(Guid gUID, string nomeUsuario, Email emailUsuario, DateTime dataEvento)
+            {
+                GUID = gUID;
+                this.nomeUsuario = nomeUsuario;
+                this.emailUsuario = emailUsuario;
+                this.dataEvento = dataEvento;
+            }
+        }
+
     }
 }
