@@ -1,7 +1,6 @@
 ﻿using Core.Entidade;
 using MassTransit;
 using UsersAPI.Interface;
-using static UsersAPI.Services.UsuarioService;
 
 namespace UsersAPI.Services
 {
