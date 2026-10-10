@@ -3,7 +3,6 @@ using Core.Validation;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Infra.Repository;
-using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Logging;
@@ -23,25 +22,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-
-#region [MassTransit]
-builder.Services.AddMassTransit(x =>
-{
-    // Producer puro: não registramos consumers aqui
-    x.UsingRabbitMq((context, cfg) =>
-    {
-        var rabbit = builder.Configuration.GetSection("RabbitMq");
-
-        cfg.Host("localhost", "/", h =>
-        {
-            h.Username("admin");
-            h.Password("admin123");
-        });
-
-        cfg.ConfigureEndpoints(context);
-    });
-});
-#endregion
 
 #region [Swagger]
 builder.Services.AddSwaggerGen(options =>
@@ -154,9 +134,31 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
+#region [Middlewares]
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<LogMiddleware>();
 app.UseMiddleware<ExceptionMiddleware>();
+#endregion 
+
+#region [Update-Migration]
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    // Check and apply pending migrations
+    var pendingMigrations = dbContext.Database.GetPendingMigrations();
+    if (pendingMigrations.Any())
+    {
+        Console.WriteLine("Applying pending migrations...");
+        dbContext.Database.Migrate();
+        Console.WriteLine("Migrations applied successfully.");
+    }
+    else
+    {
+        Console.WriteLine("No pending migrations found.");
+    }
+}
+#endregion
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

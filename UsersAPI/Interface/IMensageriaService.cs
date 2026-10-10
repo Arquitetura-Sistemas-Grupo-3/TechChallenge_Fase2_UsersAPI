@@ -1,10 +1,10 @@
-﻿using Core.Entidade;
-using static UsersAPI.Services.UsuarioService;
+﻿using Contracts.Events;
+using Core.Entidade;
 
 namespace UsersAPI.Interface
 {
     public interface IMensageriaService
     {
-        Task<UsuarioCriado> PublicarMensagemFila(Usuario usuario, CancellationToken ct);
+        Task EnviarMensagemFila(Usuario usuario);
     }
 }

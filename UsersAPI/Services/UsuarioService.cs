@@ -3,10 +3,7 @@ using Core.Entidade;
 using Core.Entidade.Enums;
 using Core.Output;
 using Core.Repository;
-using Core.ValueObjects;
 using Infra.Exceptions;
-using MassTransit;
-using MassTransit.Internals.ImTools;
 using UsersAPI.Interface;
 using BC = BCrypt.Net.BCrypt;
 
@@ -80,7 +77,7 @@ namespace UsersAPI.Services
 
                 _logger.LogInformation("Usuário {Email} adicionado com sucesso, Id={Id}", usuarioInput.Email, user.Id);
 
-                var e = await _mensageriaService.PublicarMensagemFila(user,CancellationToken.None);
+                await _mensageriaService.EnviarMensagemFila(user);
 
                 return ServiceResponse<UsuarioAdicionarResposta>.Ok(new UsuarioAdicionarResposta { Id = user.Id }, "Usuário adicionado com sucesso");
             }
