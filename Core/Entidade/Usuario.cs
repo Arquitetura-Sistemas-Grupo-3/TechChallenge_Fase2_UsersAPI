@@ -23,7 +23,7 @@ namespace Core.Entidade
                 Senha = senha,
                 NivelAcessoId = (int)nivelAcesso,
                 Ativo = true,
-                DataCriacao = DateTime.Now
+                DataCriacao = DateTime.UtcNow
             };
         }
 
@@ -32,7 +32,7 @@ namespace Core.Entidade
             Nome = string.IsNullOrEmpty(usuarioNovo.Nome) ? usuarioAntigo.Nome : usuarioNovo.Nome;
             Email = string.IsNullOrEmpty(usuarioNovo.Email) ? usuarioAntigo.Email : new Email(usuarioNovo.Email);
             Senha = string.IsNullOrEmpty(senha) ? usuarioAntigo.Senha : senha;
-            DataAtualizacao = DateTime.Now;
+            DataAtualizacao = DateTime.UtcNow;
         }
 
         public void Ativar()

@@ -45,7 +45,7 @@ namespace UsersAPI.Services
                 arguments: null);
 
             // Prepara a mensagem
-            UserCreatedEvent menssage = new UserCreatedEvent(Guid.NewGuid(), usuario.Nome, usuario.Email.Endereco, DateTime.Now);
+            UserCreatedEvent menssage = new UserCreatedEvent(Guid.NewGuid(), usuario.Nome, usuario.Email.Endereco, DateTime.UtcNow);
             var messageBody = JsonSerializer.SerializeToUtf8Bytes(menssage);
 
 
