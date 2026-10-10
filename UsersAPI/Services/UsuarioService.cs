@@ -13,11 +13,14 @@ namespace UsersAPI.Services
     {
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly ILogger<UsuarioService> _logger;
+        private readonly IMensageriaService _mensageriaService;
+        
 
-        public UsuarioService(IUsuarioRepository usuarioRepository, ILogger<UsuarioService> logger)
+        public UsuarioService(IUsuarioRepository usuarioRepository, ILogger<UsuarioService> logger, IMensageriaService mensageriaService)
         {
             _usuarioRepository = usuarioRepository;
             _logger = logger;
+            _mensageriaService = mensageriaService;
         }
         public async Task<ServiceResponse<List<UsuarioListarResposta>>> Listar(string? Nome = null, string? Email = null, string? NivelAcesso = null)
         {
@@ -73,6 +76,8 @@ namespace UsersAPI.Services
                 await _usuarioRepository.Cadastrar(user);
 
                 _logger.LogInformation("Usuário {Email} adicionado com sucesso, Id={Id}", usuarioInput.Email, user.Id);
+
+                await _mensageriaService.EnviarMensagemFila(user);
 
                 return ServiceResponse<UsuarioAdicionarResposta>.Ok(new UsuarioAdicionarResposta { Id = user.Id }, "Usuário adicionado com sucesso");
             }

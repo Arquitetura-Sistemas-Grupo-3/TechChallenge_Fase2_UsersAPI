@@ -78,6 +78,7 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<INivelAcessoRepository, NivelAcessoRepository>();
 builder.Services.AddScoped<IAuthService, AutenticacaoService>();
+builder.Services.AddScoped<IMensageriaService, MensageriaService>();
 
 builder.Services.AddTransient<CorrelationIdMiddleware>();
 #endregion
@@ -133,9 +134,31 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
+#region [Middlewares]
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<LogMiddleware>();
 app.UseMiddleware<ExceptionMiddleware>();
+#endregion 
+
+#region [Update-Migration]
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    // Check and apply pending migrations
+    var pendingMigrations = dbContext.Database.GetPendingMigrations();
+    if (pendingMigrations.Any())
+    {
+        Console.WriteLine("Applying pending migrations...");
+        dbContext.Database.Migrate();
+        Console.WriteLine("Migrations applied successfully.");
+    }
+    else
+    {
+        Console.WriteLine("No pending migrations found.");
+    }
+}
+#endregion
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
