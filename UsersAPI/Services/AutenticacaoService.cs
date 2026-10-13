@@ -42,7 +42,7 @@ namespace WebAPI.Service
             NivelAcesso acesso = await _nivelAcessoRepository.ObterPorId(usuario.NivelAcessoId);
 
             var nivelEnum = (NivelAcessoEnum)usuario.NivelAcessoId;
-            string jwt = GerarJWT(usuario.Email.Endereco, acesso.Nome);
+            string jwt = GerarJWT(usuario.Id,usuario.Email.Endereco, acesso.Nome);
 
             AutenticarResposta auth = new AutenticarResposta
             {
@@ -55,11 +55,12 @@ namespace WebAPI.Service
             return ServiceResponse<AutenticarResposta>.Ok(auth);
         }
 
-        private string GerarJWT(string username, string role)
+        private string GerarJWT(int id,string email, string role)
         {
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, username),
+                new Claim(JwtRegisteredClaimNames.Sub, id.ToString()),
+                new Claim(ClaimTypes.Email,email),
                 new Claim(ClaimTypes.Role, role),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
