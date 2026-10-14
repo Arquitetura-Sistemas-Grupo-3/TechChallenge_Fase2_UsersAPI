@@ -18,8 +18,8 @@ namespace UsersAPI.Services
         public MensageriaService(IConfiguration configuration)
         {
             _configuration = configuration;
-            _hostName = _configuration["RabbitMQ:HostName"] ?? "localhost";
-            _userName = _configuration["RabbitMQ:UserName"] ?? "admin";
+            _hostName = _configuration["RabbitMQ:Host"] ?? "localhost";
+            _userName = _configuration["RabbitMQ:Username"] ?? "admin";
             _password = _configuration["RabbitMQ:Password"] ?? "admin123";
             _queueName = _configuration["RabbitMQ:QueueName"] ?? "notifications-user-created";
         }
@@ -45,7 +45,7 @@ namespace UsersAPI.Services
                 arguments: null);
 
             // Prepara a mensagem
-            UserCreatedEvent menssage = new UserCreatedEvent(Guid.NewGuid(), usuario.Nome, usuario.Email.Endereco, DateTime.Now);
+            UserCreatedEvent menssage = new UserCreatedEvent(Guid.NewGuid(), usuario.Nome, usuario.Email.Endereco, DateTime.UtcNow);
             var messageBody = JsonSerializer.SerializeToUtf8Bytes(menssage);
 
 
