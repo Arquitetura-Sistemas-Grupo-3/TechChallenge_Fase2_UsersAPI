@@ -24,6 +24,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     ports:
       - "5000:8080"
     environment:
@@ -31,6 +33,23 @@ services:
       ConnectionStrings__DefaultConnection: "Server=db,1433;Database=UserApi;User Id= sa;Password=${DB_PASSWORD};TrustServerCertificate=True;"
       Jwt__Key: ${JWT_KEY}
       Jwt__Issuer: TechChallenge
+      RabbitMq__Host: rabbitmq
+      RabbitMq__Username: ${RABBITMQ_USER}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD}
 
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: usuarios-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 volumes:
   sqldata:
