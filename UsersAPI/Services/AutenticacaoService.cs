@@ -62,7 +62,7 @@ namespace WebAPI.Service
                 new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
                 new Claim(ClaimTypes.Email, usuario.Email.Endereco),
                 new Claim(ClaimTypes.Role, role),
-                new Claim(ClaimTypes.NameIdentifier, usuario.Nome),
+                new Claim(ClaimTypes.Name, usuario.Nome),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
