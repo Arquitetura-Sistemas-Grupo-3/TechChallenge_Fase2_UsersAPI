@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sqlserver-user-api
+spec:
+  selector:
+    app: sqlserver-user-api
+  ports:
+    - port: 1433
+      targetPort: 1433
