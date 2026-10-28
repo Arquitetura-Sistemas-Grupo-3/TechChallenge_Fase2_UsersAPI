@@ -69,7 +69,7 @@ builder.Services.AddSwaggerGen(options =>
 #region [DB]
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("UserAPI"));
 }, ServiceLifetime.Scoped);
 #endregion
 
