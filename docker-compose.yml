@@ -30,7 +30,7 @@ services:
       - "5000:8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=UserApi;User Id= sa;Password=${DB_PASSWORD};TrustServerCertificate=True;"
+      ConnectionStrings__UserAPI: "Server=db,1433;Database=UserApi;User Id= sa;Password=${DB_PASSWORD};TrustServerCertificate=True;"
       Jwt__Key: ${JWT_KEY}
       Jwt__Issuer: TechChallenge
       RabbitMq__Host: rabbitmq
